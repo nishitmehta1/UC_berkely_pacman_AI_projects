@@ -11,7 +11,6 @@
 # Student side autograding was added by Brad Miller, Nick Hay, and
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
-
 from util import manhattanDistance
 from game import Directions
 import random, util
@@ -183,6 +182,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
           return maximum
 
         def min_max(gameState, depth, agentcounter):
+
           if agentcounter >= gameState.getNumAgents():
               depth += 1
               agentcounter = 0
@@ -202,12 +202,73 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     """
       Your minimax agent with alpha-beta pruning (question 3)
     """
-
     def getAction(self, gameState):
         """
           Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
+        def min_value(gameState, depth, agentcounter, x, y):
+          minimum1 = ["", float("inf")]
+          enemy_actions = gameState.getLegalActions(agentcounter)
+
+          if not enemy_actions:
+              return self.evaluationFunction(gameState)
+
+          for movement in enemy_actions:
+              current_state = gameState.generateSuccessor(agentcounter, movement)
+              current = min_max(current_state, depth, agentcounter + 1, x, y)
+
+              if type(current) is not list:
+                  next_value = current
+              else:
+                  next_value = current[1]
+
+              if next_value < minimum1[1]:
+                  minimum1 = [movement, next_value]
+              if next_value < x:
+                  return [movement, next_value]
+              y = min(y, next_value)
+          return minimum1
+
+        def max_value(gameState, depth, agentcounter, a, b):
+            maximum = ["", -float("inf")]
+            movements = gameState.getLegalActions(agentcounter)
+
+            if not movements:
+                return self.evaluationFunction(gameState)
+
+            for movement in movements:
+                current_state = gameState.generateSuccessor(agentcounter, movement)
+                current = min_max(current_state, depth, agentcounter + 1, a, b)
+
+                if type(current) is not list:
+                    next_value = current
+                else:
+                    next_value = current[1]
+
+                # real logic
+                if next_value > maximum[1]:
+                    maximum = [movement, next_value]
+                if next_value > b:
+                    return [movement, next_value]
+                a = max(a, next_value)
+            return maximum
+
+        def min_max(gameState, depth, agentcounter, a, b):
+            if agentcounter >= gameState.getNumAgents():
+                depth += 1
+                agentcounter = 0
+
+            if (depth == self.depth or gameState.isWin() or gameState.isLose()):
+                return self.evaluationFunction(gameState)
+            elif (agentcounter == 0):
+                return max_value(gameState, depth, agentcounter, a, b)
+            else:
+                return min_value(gameState, depth, agentcounter, a, b)
+
+        actionsList = min_max(gameState, 0, 0, -float("inf"), float("inf"))
+        return actionsList[0]
+
         util.raiseNotDefined()
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
