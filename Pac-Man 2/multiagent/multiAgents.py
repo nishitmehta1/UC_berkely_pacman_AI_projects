@@ -274,17 +274,66 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
       Your expectimax agent (question 4)
-    """
-
+    """    
     def getAction(self, gameState):
         """
           Returns the expectimax action using self.depth and self.evaluationFunction
-
           All ghosts should be modeled as choosing uniformly at random from their
           legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        def find_e(gameState, depth, agentcounter):
+            enemy_actions = gameState.getLegalActions(agentcounter)
+            prob = (1.000000 / len(enemy_actions))
+            max_e = ["", 0]
+
+            if not enemy_actions:
+                return self.evaluationFunction(gameState)
+
+            for action_e in enemy_actions:
+                current_state = gameState.generateSuccessor(agentcounter, action_e)
+                current = expect_max(current_state, depth, agentcounter + 1)
+                if type(current) is list:
+                    next_value = current[1]
+                else:
+                    next_value = current
+                max_e[0] = action_e
+                max_e[1] += next_value * prob
+            return max_e
+
+        def max_value(gameState, depth, agentcounter):
+            actions = gameState.getLegalActions(agentcounter)
+            max1 = ["", -float("inf")]
+
+            if not actions:
+                return self.evaluationFunction(gameState)
+
+            for action in actions:
+                current_state = gameState.generateSuccessor(agentcounter, action)
+                current = expect_max(current_state, depth, agentcounter + 1)
+                if type(current) is not list:
+                    next_value = current
+                else:
+                    next_value = current[1]
+                if next_value > max1[1]:
+                    max1 = [action, next_value]
+            return max1
+
+        def expect_max(gameState, depth, agentcounter):
+            if agentcounter >= gameState.getNumAgents():
+                agentcounter = 0
+                depth += 1
+
+            if (depth == self.depth or gameState.isWin() or gameState.isLose()):
+                return self.evaluationFunction(gameState)
+            elif (agentcounter == 0):
+                return max_value(gameState, depth, agentcounter)
+            else:
+                return find_e(gameState, depth, agentcounter)
+
+        actionsList = expect_max(gameState, 0, 0)
+        return actionsList[0]
+
 
 def betterEvaluationFunction(currentGameState):
     """
@@ -298,4 +347,3 @@ def betterEvaluationFunction(currentGameState):
 
 # Abbreviation
 better = betterEvaluationFunction
-
