@@ -89,7 +89,7 @@ class ReflexAgent(Agent):
             if (temp_dist > dist):
                 dist = temp_dist
 
-        return dist  #Return the distance
+        return dist  #Return the distance from food
         # return successorGameState.getScore()
 
 def scoreEvaluationFunction(currentGameState):
@@ -182,7 +182,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
           return maximum
 
         def min_max(gameState, depth, agentcounter):
-
           if agentcounter >= gameState.getNumAgents():
               depth += 1
               agentcounter = 0
@@ -246,7 +245,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
                 else:
                     next_value = current[1]
 
-                # real logic
                 if next_value > maximum[1]:
                     maximum = [movement, next_value]
                 if next_value > b:
@@ -339,11 +337,21 @@ def betterEvaluationFunction(currentGameState):
     """
       Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
       evaluation function (question 5).
-
-      DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    now_state = list(currentGameState.getPacmanPosition())
+    food_position = currentGameState.getFood().asList()
+    food_items = []
+
+    for food in food_position:
+        pacman_dist_food = manhattanDistance(now_state, food)
+        food_items.append(-1 * pacman_dist_food)
+
+    if not food_items:
+        food_items.append(0)
+
+    return currentGameState.getScore() + max(food_items)
+    # util.raiseNotDefined()
 
 # Abbreviation
 better = betterEvaluationFunction
